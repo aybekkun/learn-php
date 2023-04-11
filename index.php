@@ -1,23 +1,27 @@
-<?php
 
+<?php
+//Запрос к БД через PDO
 require_once "setting.php";
 //подключение к MySQL
-$connection = new mysqli($host, $user, $pass, $date);
+// charset чтобы не летало кодировка чтобы корректно работать с кирилицой;
+$connection = new PDO("mysql:host=localhost;dbname=mysite;charset=utf8", "root", "");
 
-if ($connection->connect_error) die("Error Connection");
+//Прямой запрос не безопасен. не спасает от SQL injection
+// $query = "INSERT INTO `users`(`name`, `email`, `text`) VALUES ('Bill','bill@gmail.com','Hell')";
+// $count = $connection->exec($query);
 
-//запрос данных
-$query = "SELECT * FROM users";
-$result = $connection->query($query);
+$name = 'BAndrey';
+$email = "h@gmail.com";
+$text = "simple text";
 
-if (!$result) die("error selecct");
+$param = [
+    'name' => $name,
+    'email' => $email,
+    'text' => $text
+];
 
-$rows = $result->num_rows;
+$sql =  "INSERT INTO `users`(`name`, `email`, `text`) VALUES (:name,:email,:text)";
 
-for ($i = 0; $i < $rows; $i++) {
-    $result->data_seek($rows);
-    echo 'Name: ' . $result->fetch_assoc()['name'];
-}
-//закрыт связь с бд
-$result->close();
-$connection->close();
+$query = $connection->prepare($sql);
+
+$query->execute($param);
